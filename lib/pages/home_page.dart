@@ -27,7 +27,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   List<Post> posts = [];
   bool isLoading = true;
 
-  final BackgroundSyncManager syncManager = BackgroundSyncManager();
+  late final BackgroundSyncManager syncManager;
 
   @override
   void initState() {
@@ -42,7 +42,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
       ApiService.fetchCategoryPosts(category);
     }
 
-    // Start periodic/background sync for posts
+    // Start periodic/background sync for posts,
+    // using _fetchPosts() as the callback to update UI.
+    syncManager = BackgroundSyncManager(onSync: _fetchPosts);
     syncManager.start();
   }
 
@@ -83,7 +85,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   // Navigation function for the drawer
   void _handleNavigate(String url) {
     if (url.isEmpty) {
-      // Navigate to home by clearing navigation stack
       Navigator.pushNamedAndRemoveUntil(context, '/', (route) => false);
     } else {
       Navigator.pushNamed(context, '/$url');
