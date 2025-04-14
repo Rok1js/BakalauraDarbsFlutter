@@ -1,54 +1,32 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationService {
-  // Singleton setup
-  static final NotificationService _instance = NotificationService._internal();
-  factory NotificationService() => _instance;
-  NotificationService._internal();
+  static final FlutterLocalNotificationsPlugin _notificationsPlugin =
+  FlutterLocalNotificationsPlugin();
 
-  final notificationsPlugin = FlutterLocalNotificationsPlugin();
-  bool _isInitialized = false;
+  static Future<void> init() async {
+    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
 
-  Future<void> initNotification() async {
-    if (_isInitialized) return;
-
-    const initSettingsAndroid = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const initSettingsIOS = DarwinInitializationSettings(
-      requestAlertPermission: true,
-      requestBadgePermission: true,
-      requestSoundPermission: true,
+    const initializationSettings = InitializationSettings(
+      android: androidSettings,
     );
 
-    const initSettings = InitializationSettings(
-      android: initSettingsAndroid,
-      iOS: initSettingsIOS,
-    );
-
-    await notificationsPlugin.initialize(initSettings);
-    _isInitialized = true; // <-- you forgot to set this before!
+    await _notificationsPlugin.initialize(initializationSettings);
   }
 
-  NotificationDetails notificationDetails() {
-    return const NotificationDetails(
-      android: AndroidNotificationDetails(
-        'channel_id',
-        'General',
-        importance: Importance.max,
-        priority: Priority.high,
-      ),
-      iOS: DarwinNotificationDetails(
-        presentAlert: true,
-        presentBadge: true,
-        presentSound: true,
-      ),
-    );
-  }
-
-  Future<void> showNotification({
-    int id = 0,
-    String? title,
-    String? body,
+  static Future<void> show({
+    required String title,
+    required String body,
   }) async {
-    await notificationsPlugin.show(id, title, body, notificationDetails());
+    const androidDetails = AndroidNotificationDetails(
+      'channel_id',
+      'General Notifications',
+      importance: Importance.high,
+      priority: Priority.high,
+    );
+
+    const details = NotificationDetails(android: androidDetails);
+
+    await _notificationsPlugin.show(0, title, body, details);
   }
 }

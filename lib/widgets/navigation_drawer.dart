@@ -53,15 +53,6 @@ class NavigationDrawer extends StatelessWidget {
                 },
               ),
             ),
-            ElevatedButton(
-              onPressed: () {
-                NotificationService().showNotification(
-                  title: 'Test Notification',
-                  body: 'You tapped the drawer!',
-                );
-              },
-              child: const Text('Send Test Notification'),
-            ),
           ],
         ),
       ),
