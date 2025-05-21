@@ -14,12 +14,12 @@ import 'package:http/http.dart' as http;
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await NotificationService.init();
+  // await NotificationService.init();
   await Hive.initFlutter();
   await Hive.openBox('posts');
 
-  await Firebase.initializeApp();
-  await _initFCM();
+  // await Firebase.initializeApp();
+  // await _initFCM();
 
   runApp(const MyApp());
 }
@@ -34,14 +34,12 @@ class MyApp extends StatelessWidget {
       theme: ThemeData.dark(),
       initialRoute: '/',
       onGenerateRoute: (settings) {
-        // Extract route + arguments
         final uri = Uri.parse(settings.name ?? '');
 
         if (uri.path == '/') {
           return MaterialPageRoute(builder: (_) => const HomePage());
         }
 
-        // Handle category route like /posts/world
         if (uri.pathSegments.length == 2 &&
             uri.pathSegments[0] == 'posts') {
           final category = uri.pathSegments[1];
@@ -50,7 +48,6 @@ class MyApp extends StatelessWidget {
           );
         }
 
-        // Handle post detail via arguments
         if (uri.path == '/post' && settings.arguments is Post) {
           final post = settings.arguments as Post;
           return MaterialPageRoute(
@@ -58,7 +55,6 @@ class MyApp extends StatelessWidget {
           );
         }
 
-        // Unknown route fallback
         return MaterialPageRoute(
           builder: (_) => const Scaffold(
             body: Center(child: Text('Page not found')),
@@ -72,11 +68,9 @@ class MyApp extends StatelessWidget {
 Future<void> _initFCM() async {
   FirebaseMessaging messaging = FirebaseMessaging.instance;
 
-  // ✅ Request notification permission (important on Android 13+)
   NotificationSettings settings = await messaging.requestPermission();
   print('Permission granted: ${settings.authorizationStatus}');
 
-  // ✅ Print the token (use this to send test messages from Firebase Console)
   final token = await messaging.getToken();
   print('FCM Token: $token');
 
@@ -86,13 +80,11 @@ Future<void> _initFCM() async {
   );
 
 
-  // ✅ Handle foreground notifications (app is open)
   FirebaseMessaging.onMessage.listen((RemoteMessage message) {
     print('[FCM] Foreground: ${message.notification?.title}');
 
     final notification = message.notification;
     if (notification != null) {
-      // Show system notification while app is open
       NotificationService.show(
         title: notification.title ?? 'No title',
         body: notification.body ?? 'No body',
@@ -100,16 +92,12 @@ Future<void> _initFCM() async {
     }
   });
 
-  // ✅ Handle notification tap when app is in background
   FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
     print('[FCM] Opened from background: ${message.notification?.title}');
-    // You can navigate to a screen here
   });
 
-  // ✅ Handle when app is launched from terminated state via notification
   RemoteMessage? initialMessage = await messaging.getInitialMessage();
   if (initialMessage != null) {
     print('[FCM] Launched from terminated: ${initialMessage.notification?.title}');
-    // You can navigate to a screen here
   }
 }
